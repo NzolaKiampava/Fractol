@@ -24,3 +24,13 @@
 3. Compile the project:
     ```bash
     make
+
+## Usage
+
+To run the program, use the following command:
+   ```bash
+      ./fractol [fractal_type] [optional parameters]
+      ./fractol M
+      ./fractol J -0.7 0.27015
+      ./fractol J -0.7 0.27015 0x00FF00
+
