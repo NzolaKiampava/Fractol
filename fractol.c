@@ -66,7 +66,7 @@ char	*put_str_msg(t_fractol *fractal)
 	return (str_msg);
 }
 
-static void	handle_arg(t_fractol fractal, int argc, char **argv)
+static void	handle_arg(t_fractol *fractal, int argc, char **argv)
 {
 	if (argc < 2)
 		usage_msg();

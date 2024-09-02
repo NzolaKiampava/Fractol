@@ -48,7 +48,7 @@ void	draw_fractal(t_mlx *mlx, t_fractol *f)
 				f->color = mandelbrot(c_re, c_im);
 			else if (f->type == 'J')
 				f->color = julia(c_re, c_im, f->julia_re, f->julia_im);
-			pixel = (x * mlx->bpp / 8) + (y * mlx->size_line);
+			pixel = (x * mlx->bpp / 8) + (y * mlx->sline);
 			if (f->color == MAX_ITER)
 				*(int *)(mlx->data + pixel) = 0x000000;
 			else
