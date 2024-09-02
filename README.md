@@ -32,5 +32,5 @@ To run the program, use the following command:
       ./fractol [fractal_type] [optional parameters]
       ./fractol M
       ./fractol J -0.7 0.27015
-      ./fractol J -0.7 0.27015 0x00FF00
+      ./fractol J -0.7 0.27015
 
