@@ -25,6 +25,13 @@
     ```bash
     make
 
+## IMAGES | MANDELBROT SET
+![It is an image](https://github.com/NzolaKiampava/Fractol/blob/main/msndelbrot.png)
+
+## IMAGE | JULIA SET
+![It is an image](https://github.com/NzolaKiampava/Fractol/blob/main/julia.png)
+
+
 ## Usage
 
 To run the program, use the following command:
@@ -33,4 +40,3 @@ To run the program, use the following command:
       ./fractol M
       ./fractol J -0.7 0.27015
       ./fractol J -0.7 0.27015
-
