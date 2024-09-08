@@ -11,7 +11,7 @@
 # **************************************************************************** #
 
 NAME = libft.a
-CC = gcc
+CC = cc
 CFLAGS = -Wall -Werror -Wextra -g3
 AR = ar rcs
 SRC = ft_isalpha \
