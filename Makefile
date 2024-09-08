@@ -14,7 +14,7 @@
 NAME = fractol
 
 # Compiler
-CC = gcc
+CC = cc
 
 # Compilation flags
 CFLAGS = -Wall -Wextra -Werror -I$(MLX_DIR) -I$(LIBFT_DIR) -I$(HEADER_DIR)
