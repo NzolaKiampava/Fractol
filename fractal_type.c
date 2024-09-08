@@ -13,7 +13,7 @@
 #include "fractol.h"
 
 int	mandelbrot(double c_re, double c_im)
-{	
+{
 	double	z_re;
 	double	z_im;
 	double	z_re2;
@@ -36,26 +36,28 @@ int	mandelbrot(double c_re, double c_im)
 	return (n);
 }
 
-int	julia(double z_re, double z_im, double c_re, double c_im)
+int	julia_shift(int x, int y, t_fractol *f)
 {
-	double	z_re2;
-	double	z_im2;
-	double	new_re;
-	double	new_im;
+	f->c_re = f->min_re + (double)x * (f->max_re - f->min_re) / WIDTH;
+	f->c_im = f->max_im + (double)y * (f->min_im - f->max_im) / HEIGHT;
+	draw_fractal(f);
+	return (0);
+}
+
+int	julia(t_fractol *f, double zr, double zi)
+{
 	int		n;
+	double	tmp;
 
 	n = 0;
 	while (n < MAX_ITER)
 	{
-		z_re2 = z_re * z_re;
-		z_im2 = z_im * z_im;
-		if (z_re2 + z_im2 > 4.0)
+		if ((zi * zi + zr * zr) > 4.0)
 			break ;
-		new_re = z_re2 - z_im2 + c_re;
-		new_im = 2.0 * z_re * z_im + c_im;
-		z_re = new_re;
-		z_im = new_im;
-		++n;
+		tmp = 2 * zr * zi + f->c_im;
+		zr = zr * zr - zi * zi + f->c_re;
+		zi = tmp;
+		n++;
 	}
 	return (n);
 }

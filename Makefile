@@ -36,7 +36,14 @@ SRCS =	fractol.c \
 	guide_msg.c \
 	util.c \
 	generate_fractal.c \
-	event_func.c
+	event_func.c \
+	init.c \
+	colors.c \
+	k_event_func.c \
+	reset_fractal.c \
+	rgb_colors/color_interp.c \
+	rgb_colors/color_special.c \
+	rgb_colors/color_striped.c \
 	
 # Object files
 OBJS = $(SRCS:.c=.o)
