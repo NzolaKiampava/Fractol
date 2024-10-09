@@ -12,94 +12,78 @@
 
 #include "fractol.h"
 
-static void	init(t_fractol *fractal)
+static int	cmp_param(char *av, char *str, char c, char n)
 {
-	double	aspect_ratio;
-	double	range_re;
-	double	range_im;
+	int	i;
 
-	if (fractal->type == 'J')
+	i = 0;
+	while (av[i])
 	{
-		fractal->min_re = -2.0;
-		fractal->max_re = 2.0;
-		fractal->min_im = -1.5;
-		fractal->julia_re = 0.355;
-		fractal->julia_im = 0.355;
+		av[i] = ft_tolower(av[i]);
+		i++;
 	}
+	if (!ft_strncmp(av, str, ft_strlen(str) + 1))
+		return (1);
+	else if (av[1] == '\0' && (av[0] == c || av[0] == n))
+		return (1);
+	return (0);
+}
+
+static void	check_set(t_fractol *f, char **av)
+{
+	if (cmp_param(av[1], "mandelbrot", 'm', '1'))
+		f->type = M;
+	else if (cmp_param(av[1], "julia", 'j', '2'))
+		f->type = J;
 	else
+		usage_msg(f);
+}
+
+static void	julia_check(t_fractol *f, int ac, char **av)
+{
+	if (f->type != J || ac == 2)
 	{
-		aspect_ratio = (double)HEIGHT / (double)WIDTH;
-		fractal->min_re = -2.0;
-		fractal->max_re = 2.0;
-		fractal->min_im = -1.5;
-		fractal->min_im = -2.0 * aspect_ratio;
+		f->c_re = -0.799667;
+		f->c_im = -0.091000;
+		return ;
 	}
-	range_re = fractal->max_re - fractal->min_re;
-	fractal->max_im = fractal->min_im + range_re * HEIGHT / WIDTH;
-	fractal->re_factor = range_re / (WIDTH - 1);
-	range_im = fractal->max_im - fractal->min_im;
-	fractal->im_factor = range_im / (HEIGHT - 1);
+	if (ac == 3)
+		usage_msg(f);
+	if (!ft_strchr(av[2], '.'))
+		usage_msg(f);
+	if (!ft_strchr(av[3], '.'))
+		usage_msg(f);
+	f->c_re = ft_atof(av[2]);
+	f->c_im = ft_atof(av[3]);
+	if (f->c_re > 2.0 || f->c_re < -2.0)
+		usage_msg(f);
+	if (f->c_im >= 2.0 || f->c_im <= -2.0)
+		usage_msg(f);
 }
 
-static void	julia_check(t_fractol *fractal, char **argv)
+static void	handle_arg(t_fractol *f, int argc, char **argv)
 {
-	if (!ft_strchr(argv[2], '.'))
-		usage_msg();
-	if (!ft_strchr(argv[3], '.'))
-		usage_msg();
-	fractal->julia_re = ft_atof(argv[2]);
-	fractal->julia_im = ft_atof(argv[3]);
-	if (fractal->julia_re > 2.0 || fractal->julia_re < -2.0)
-		usage_msg();
-	if (fractal->julia_im >= 2.0 || fractal->julia_im <= -2.0)
-		usage_msg();
-}
-
-char	*put_str_msg(t_fractol *fractal)
-{
-	char	*str_msg;
-
-	if (fractal->type == 'M')
-		str_msg = "Fractal | MandelBrot";
-	else if (fractal->type == 'J')
-		str_msg = "Fractal | Julia";
-	return (str_msg);
-}
-
-static void	handle_arg(t_fractol *fractal, int argc, char **argv)
-{
-	if (argc < 2)
-		usage_msg();
-	else if (argc == 3 || argc > 4)
-		usage_msg();
-	fractal->type = argv[1][0];
-	if (fractal->type != 'M' && fractal->type != 'J')
-		invalid_arg_msg();
+	check_set(f, argv);
+	if (f->type != J && argc > 3)
+		usage_msg(f);
+	else if (f->type == J && argc > 5)
+		usage_msg(f);
+	julia_check(f, argc, argv);
+	get_color(f, argc, argv);
 }
 
 int	main(int argc, char **argv)
 {
-	t_mlx		mlx;
-	t_fractol	fractal;
-	char		*str_msg;
+	t_fractol	f;
 
-	handle_arg(&fractal, argc, argv);
-	init(&fractal);
-	if (fractal.type == 'J')
-	{
-		if (argc == 4)
-			julia_check(&fractal, argv);
-	}
-	str_msg = put_str_msg(&fractal);
-	mlx.mlx_ptr = mlx_init();
-	mlx.win_ptr = mlx_new_window(mlx.mlx_ptr, WIDTH, HEIGHT, str_msg);
-	mlx.img_ptr = mlx_new_image(mlx.mlx_ptr, WIDTH, HEIGHT);
-	mlx.data = mlx_get_data_addr(mlx.img_ptr, &mlx.bpp, &mlx.sline, &mlx.en);
-	draw_fractal(&mlx, &fractal);
-	mlx_put_image_to_window(mlx.mlx_ptr, mlx.win_ptr, mlx.img_ptr, 0, 0);
-	mlx_hook(mlx.win_ptr, CLOSE_BTN, 0, close_window, NULL);
-	mlx_key_hook(mlx.win_ptr, handle_key, NULL);
-	mlx_mouse_hook(mlx.win_ptr, mouse_hook, &mlx);
-	mlx_loop(mlx.mlx_ptr);
-	return (0);
+	reset_values(&f);
+	if (argc < 2)
+		usage_msg(&f);
+	handle_arg(&f, argc, argv);
+	init(&f);
+	draw_fractal(&f);
+	mlx_hook(f.win_ptr, CLOSE_BTN, 0, erase_fractol, &f);
+	mlx_key_hook(f.win_ptr, handle_key, &f);
+	mlx_mouse_hook(f.win_ptr, mouse_hook, &f);
+	mlx_loop(f.mlx_ptr);
 }
