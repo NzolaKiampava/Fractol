@@ -12,66 +12,97 @@
 
 #include "fractol.h"
 
-int	close_window(t_fractol *fractal, t_mlx *mlx)
+void	close_window(int exit_code, t_fractol *f)
 {
-	if (!fractal)
-		exit(0);
-	if (mlx->img_ptr)
-		mlx_destroy_image(mlx->mlx_ptr, mlx->img_ptr);
-	if (mlx->win_ptr && mlx->img_ptr)
-		mlx_destroy_window(mlx->mlx_ptr, mlx->img_ptr);
-	if (mlx->mlx_ptr)
+	if (!f)
+		exit(exit_code);
+	if (f->palette)
+		free(f->palette);
+	if (f->img_ptr)
+		mlx_destroy_image(f->mlx_ptr, f->img_ptr);
+	if (f->win_ptr && f->mlx_ptr)
+		mlx_destroy_window(f->mlx_ptr, f->win_ptr);
+	if (f->mlx_ptr)
 	{
-		mlx_loop_end(mlx->mlx_ptr);
-		mlx_destroy_display(mlx->mlx_ptr);
-		free(mlx->mlx_ptr);
+		mlx_loop_end(f->mlx_ptr);
+		mlx_destroy_display(f->mlx_ptr);
+		free(f->mlx_ptr);
 	}
-	exit(0);
+	exit(exit_code);
 }
 
-int	handle_key(int key, t_fractol *fractal, t_mlx *mlx)
+int	erase_fractol(t_fractol *f)
 {
-	if (key == ESC)
-	{
-		close_window(fractal, mlx);
-		return (0);
-	}
+	close_window(0, f);
 	return (0);
 }
 
-static void	mup_calculation(t_fractol *fractal, double m_re, double m_im)
+static void	zoom(t_fractol *f, double zoom_scale)
 {
-	fractal->min_re = m_re + (fractal->min_re - m_re) / ZOOM_FACTOR;
-	fractal->max_re = m_re + (fractal->max_re - m_re) / ZOOM_FACTOR;
-	fractal->min_im = m_im + (fractal->min_im - m_im) / ZOOM_FACTOR;
-	fractal->max_im = m_im + (fractal->max_im - m_im) / ZOOM_FACTOR;
+	double	center_re;
+	double	center_im;
+	double	width_re;
+	double	height_im;
+
+	center_re = (f->min_re + f->max_re) / 2;
+	center_im = (f->min_im + f->max_im) / 2;
+	width_re = f->max_re - f->min_re;
+	height_im = f->max_im - f->min_im;
+	f->min_re = center_re - (width_re * zoom_scale) / 2;
+	f->max_re = center_re + (width_re * zoom_scale) / 2;
+	f->min_im = center_im - (height_im * zoom_scale) / 2;
+	f->max_im = center_im + (height_im * zoom_scale) / 2;
 }
 
-static void	mdown_calculation(t_fractol *fractal, double m_re, double m_im)
+static void	relocate(t_fractol *f, double dst, char dir)
 {
-	fractal->min_re = m_re + (fractal->min_re - m_re) * ZOOM_FACTOR;
-	fractal->max_re = m_re + (fractal->max_re - m_re) * ZOOM_FACTOR;
-	fractal->min_im = m_im + (fractal->min_im - m_im) * ZOOM_FACTOR;
-	fractal->max_im = m_im + (fractal->max_im - m_im) * ZOOM_FACTOR;
+	double	center_re;
+	double	center_im;
+
+	center_re = f->max_re - f->min_re;
+	center_im = f->max_im - f->min_im;
+	if (dir == 'R')
+	{
+		f->min_re += center_re * dst;
+		f->max_re += center_re * dst;
+	}
+	else if (dir == 'L')
+	{
+		f->min_re -= center_re * dst;
+		f->max_re -= center_re * dst;
+	}
+	else if (dir == 'D')
+	{
+		f->min_im -= center_im * dst;
+		f->max_im -= center_im * dst;
+	}
+	else if (dir == 'U')
+	{
+		f->min_im += center_im * dst;
+		f->max_im += center_im * dst;
+	}
 }
 
-int	mouse_hook(int button, int x, int y, void *param)
+int	mouse_hook(int key, int x, int y, t_fractol *f)
 {
-	double		mouse_re;
-	double		mouse_im;
-	t_mlx		*mlx;
-	t_fractol	*fractal;
-
-	mlx = (t_mlx *)param;
-	fractal = (t_fractol *)(mlx + 1);
-	mouse_re = fractal->min_re + x * fractal->re_factor;
-	mouse_im = fractal->max_im - y * fractal->im_factor;
-	if (button == MOUSE_WHEEL_UP)
-		mup_calculation(fractal, mouse_re, mouse_im);
-	else if (button == MOUSE_WHEEL_DOWN)
-		mdown_calculation(fractal, mouse_re, mouse_im);
-	fractal->re_factor = (fractal->max_re - fractal->min_re) / (WIDTH - 1);
-	fractal->im_factor = (fractal->max_im - fractal->min_im) / (HEIGHT - 1);
-	update_fractal(mlx, fractal);
+	if (key == MOUSE_WHEEL_UP)
+	{
+		zoom(f, 0.5);
+		x = x - WIDTH / 2;
+		y = y - HEIGHT / 2;
+		if (x < 0)
+			relocate(f, (double)(-x) / WIDTH, 'L');
+		else if (x > 0)
+			relocate(f, (double)x / WIDTH, 'R');
+		if (y < 0)
+			relocate(f, (double)(-y) / HEIGHT, 'U');
+		else if (y > 0)
+			relocate (f, (double)y / HEIGHT, 'D');
+	}
+	else if (key == MOUSE_WHEEL_DOWN)
+		zoom(f, 2);
+	else
+		return (0);
+	draw_fractal(f);
 	return (0);
 }
