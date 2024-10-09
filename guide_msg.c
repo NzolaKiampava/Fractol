@@ -20,19 +20,12 @@ static void	welcome_message(void)
 	ft_putendl_fd("+===============================================+\n", 1);
 }
 
-void	usage_msg(void)
+void	usage_msg(t_fractol *f)
 {
 	welcome_message();
 	ft_putendl_fd("\033[1;39mUsage: ./fractol [M | J]\033[0m\n", 1);
 	ft_putendl_fd("M: Mandelbrot\nJ: Julia\n", 1);
 	ft_putendl_fd("\033[1;36mJulia Usage: ./fractol J <re> <im>", 1);
 	ft_putendl_fd("For Julia. Ex: ./fractol J -0.800616 -0.100090\n", 1);
-	exit(1);
-}
-
-void	invalid_arg_msg(void)
-{
-	ft_putendl_fd("\033[1;31mInvalid fractal type.", 1);
-	ft_putendl_fd("Use 'M' for Mandelbrot or 'J' for Julia.\033[0m\n", 1);
-	exit(1);
+	close_window(EXIT_FAILURE, f);
 }
